@@ -8,6 +8,14 @@ from sys import argv, exit, stderr
 from typing import List
 from os import path
 
+debug_state = False  # Set to True to enable debug information
+
+
+def debug(*args, **kwargs) -> None:
+    """Prints debug information."""
+    if debug_state:
+        print(*args, **kwargs)
+
 
 def open_file(filename: str) -> str:
     """Opens a file and returns the text."""
@@ -15,6 +23,7 @@ def open_file(filename: str) -> str:
         raise FileNotFoundError(f'Missing {filename}')
     with open(filename, 'r') as f:
         text = f.readlines()
+        debug(f'Opened {filename} with {len(text)} lines')
     return text
 
 
@@ -37,22 +46,58 @@ def get_heading_level(line: str) -> int:
     return level
 
 
-def heading(text: str, level: int) -> str:
+def heading(line: str) -> str:
     """Converts markdown headings to html headings."""
+    # level + 1 because markdown headings as space after the # symbol
+    level = get_heading_level(line)
     # Strip removes leading and trailing whitespaces
-    return f'<h{level}>{text.strip()}</h{level}>'
+    heading_content = line[level + 1:].strip()
+    debug(f'Converting \'{heading_content}\' to heading level {level}')
+    return f'<h{level}>{heading_content}</h{level}>'
+
+
+def unordered_list_item(lines: List[str], index: int) -> str:
+    """Converts markdown unordered lists to html unordered lists."""
+    html = ['<ul>']
+    for i in range(index, len(lines)):
+        line = lines[i]
+        if (line.startswith('- ')):
+            li_content = line[2:].strip()
+            debug(f'Converting \'{li_content}\' to list item')
+            html.append(f'<li>{li_content}</li>')
+            index += 1
+        else:
+            break
+    html.append('</ul>')
+    return index, html
 
 
 def convert(lines: List[str]) -> str:
     """Converts markdown to html."""
 
     html = []
+    index = 0
 
-    for line in lines:
+    debug(f'Converting {len(lines)} lines of markdown to html')
+
+    # We use a while loop instead of a for loop because we need to skip lines
+    while (index < len(lines)):
+        line = lines[index]  # Get the current line as a variable
+
         if (line.startswith('#')):
-            level = get_heading_level(line)
-            # level + 1 because markdown headings as space after the # symbol
-            html.append(heading(line[level + 1:], level))
+            debug(f'{line} is a heading')
+            html.append(heading(line))
+            index += 1  # Go to the next line
+            continue
+        if (line.startswith('- ')):
+            debug(f'{line} is an unordered list item')
+            # We need to update the index with the new value
+            index, html_list = unordered_list_item(lines, index)
+            html.extend(html_list)
+            continue
+
+        index += 1  # In case the line does not match above conditions
+        debug(f'{line} was not converted')
 
     return '\n'.join(html)
 
