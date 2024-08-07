@@ -4,18 +4,17 @@
     Usage: markdown2html.py <inputfile.md> <outputfile.html>
 """
 
-from sys import argv, exit
+from sys import argv, exit, stderr
+from os import path
 
 
 def open_file(filename: str) -> str:
     """Opens a file and returns the text."""
-    try:
-        with open(filename, 'r') as f:
-            text = f.read()
-        return text
-    except FileNotFoundError as err:
-        print(f'Missing {filename}')
-        raise err
+    if not path.isfile(filename):
+        raise FileNotFoundError(f'Missing {filename}')
+    with open(filename, 'r') as f:
+        text = f.read()
+    return text
 
 
 def markdown2html(inputfile: str, outputfile: str = None) -> None:
@@ -25,15 +24,20 @@ def markdown2html(inputfile: str, outputfile: str = None) -> None:
 
 def main() -> None:
     """Main function starting the program"""
-    if (len(argv) != 3):
-        print('Usage: ./markdown2html.py README.md README.html')
-        exit(1)
     try:
+        if (len(argv) != 3):
+            raise ValueError('Usage: ./markdown2html.py README.md README.html')
         markdown2html(argv[1], argv[2])
-    except FileNotFoundError:
-        exit(1)
-    exit(0)
-    # markdown2html(sys.argv[1], sys.argv[2])
+        exit(0)  # File converted successfully
+    except ValueError as err:
+        print(err, file=stderr)
+        exit(1)  # Invalid arguments
+    except FileNotFoundError as err:
+        print(err, file=stderr)
+        exit(1)  # File not found
+    except Exception as err:
+        print(err, file=stderr)
+        exit(1)  # Unknown error occurred
 
 
 if __name__ == '__main__':
