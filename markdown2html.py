@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/python3
 """
     markdown2html.py: Converts markdown files to html files.
     Usage: markdown2html.py <inputfile.md> <outputfile.html>
@@ -18,7 +18,7 @@ def open_file(filename: str) -> str:
         raise err
 
 
-def markdown2html(inputfile: str, outputfile: str) -> None:
+def markdown2html(inputfile: str, outputfile: str = None) -> None:
     """Converts markdown files to html files."""
     text = open_file(inputfile)
 
