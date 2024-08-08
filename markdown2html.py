@@ -120,7 +120,8 @@ def paragraph(lines: List[str], index: int) -> Tuple[
     html_text = f"<p>\n{html_body}\n</p>"
 
     if (index != original_index):
-        debug(f'Converted paragraph at index {original_index}, incrementing index to {index}')
+        debug(f'Converted paragraph at index {original_index},\
+              incrementing index to {index}')
         return index, html_text
 
     return original_index + 1, None
@@ -169,7 +170,7 @@ def markdown2html(inputfile: str, outputfile: str) -> None:
 
     lines = open_file(inputfile)
     html_content = convert(lines)  # Convert markdown to html
-    save_file(outputfile, html_content) # Save the html content to a html file
+    save_file(outputfile, html_content)  # Save the html content to a html file
 
 
 def main() -> None:
