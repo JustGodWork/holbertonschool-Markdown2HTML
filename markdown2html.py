@@ -102,7 +102,7 @@ def paragraph(lines: List[str], index: int) -> Tuple[int, List[str] | None]:
             debug(f'Index is now {index}, original index is {original_index}')
 
     for i in range(len(html) - 1, 1, -1):
-        html.insert(i, '<br>')
+        html.insert(i, '<br/>')
 
     html.append('</p>')
 
