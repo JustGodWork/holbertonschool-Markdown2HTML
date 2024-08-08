@@ -91,13 +91,13 @@ def paragraph(lines: List[str], index: int) -> Tuple[int, List[str] | None]:
     html = ['<p>']
 
     for i in range(index, len(lines)):
-        line = lines[i]
+        line = lines[i].strip()
 
-        if (line == '\n'):
+        if (line == ''):
             break
         else:
             debug(f'Converting \'{line}\' to paragraph')
-            html.append(line.strip())
+            html.append(line)
             index += 1
             debug(f'Index is now {index}, original index is {original_index}')
 
@@ -120,6 +120,11 @@ def convert(lines: List[str]) -> str:
     # We use a while loop instead of a for loop because we need to skip lines
     while (index < len(lines)):
         line = lines[index]  # Get the current line as a variable
+
+        if (line == '\n'):
+            debug(f'line {index} is a newline')
+            index += 1  # Go to the next line
+            continue
 
         if (line.startswith('#')):
             debug(f'{line} is a heading')
