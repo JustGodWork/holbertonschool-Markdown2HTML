@@ -5,11 +5,11 @@
 """
 
 from sys import argv, exit, stderr, stdout
-from typing import List
+from typing import List, Tuple
 from os import path
 
 
-debug_state = False  # Set to True to enable debug information
+debug_state = True  # Set to True to enable debug information
 
 
 def debug(*args, **kwargs) -> None:
@@ -65,7 +65,7 @@ def heading(line: str) -> str:
 
 
 def list_item(lines: List[str], index: int,
-              prefix: str, list_type: str) -> str:
+              prefix: str, list_type: str) -> Tuple[int, List[str]]:
     """Converts markdown unordered lists to html unordered lists."""
 
     html = [f'<{list_type}>']
@@ -82,6 +82,31 @@ def list_item(lines: List[str], index: int,
             break
     html.append(f'</{list_type}>')
     return index, html
+
+
+def paragraph(lines: List[str], index: int) -> Tuple[int, List[str] | None]:
+    """Converts markdown paragraphs to html paragraphs."""
+
+    original_index = index
+    html = ['<p>']
+
+    for i in range(index, len(lines)):
+        line = lines[i]
+
+        if (line == '\n'):
+            break
+        else:
+            debug(f'Converting \'{line}\' to paragraph')
+            html.append(line.strip())
+            index += 1
+            debug(f'Index is now {index}, original index is {original_index}')
+
+    for i in range(len(html) - 1, 1, -1):
+        html.insert(i, '<br>')
+
+    html.append('</p>')
+
+    return index + 1, html if (index != original_index) else None
 
 
 def convert(lines: List[str]) -> str:
@@ -115,8 +140,9 @@ def convert(lines: List[str]) -> str:
             html.extend(html_list)
             continue
 
-        index += 1  # In case the line does not match above conditions
-        debug(f'{line} was not converted')
+        # In case the line does not match above conditions
+        index, html_paragraph = paragraph(lines, index)
+        html_paragraph and html.extend(html_paragraph)
 
     return '\n'.join(html)
 
