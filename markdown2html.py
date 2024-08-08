@@ -5,7 +5,7 @@
 """
 
 from sys import argv, exit, stderr, stdout
-from typing import List, Tuple
+from typing import List, LiteralString, Tuple
 from os import path
 
 
@@ -84,11 +84,14 @@ def list_item(lines: List[str], index: int,
     return index, html
 
 
-def paragraph(lines: List[str], index: int) -> Tuple[int, List[str] | None]:
+def paragraph(lines: List[str], index: int) -> Tuple[
+    int,
+    LiteralString | None
+]:
     """Converts markdown paragraphs to html paragraphs."""
 
     original_index = index
-    html = ['<p>']
+    html = []
 
     for i in range(index, len(lines)):
         line = lines[i].strip()
@@ -101,18 +104,16 @@ def paragraph(lines: List[str], index: int) -> Tuple[int, List[str] | None]:
             index += 1
             debug(f'Index is now {index}, original index is {original_index}')
 
-    for i in range(len(html) - 1, 1, -1):
-        html.insert(i, '<br/>')
+    html_body = '\n<br/>\n'.join(html)
+    html_text = f"<p>\n{html_body}\n</p>"
 
-    html.append('</p>')
-
-    return index + 1, html if (index != original_index) else None
+    return index + 1, html_text if (index != original_index) else None
 
 
 def convert(lines: List[str]) -> str:
     """Converts markdown to html."""
 
-    html = []
+    html: List[str | LiteralString] = []
     index = 0
 
     debug(f'Converting {len(lines)} lines of markdown to html')
@@ -147,7 +148,7 @@ def convert(lines: List[str]) -> str:
 
         # In case the line does not match above conditions
         index, html_paragraph = paragraph(lines, index)
-        html_paragraph and html.extend(html_paragraph)
+        html_paragraph and html.append(html_paragraph)
 
     return '\n'.join(html)
 
