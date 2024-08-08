@@ -11,7 +11,7 @@ from typing import List, Tuple
 from os import path
 
 
-debug_state = False  # Set to True to enable debug information
+debug_state = True  # Set to True to enable debug information
 
 
 def debug(*args, **kwargs) -> None:
@@ -54,6 +54,42 @@ def is_markdown(line: str) -> bool:
     )
 
 
+def handle_bold_and_italic(line: str) -> str:
+    """Converts markdown bold and italic to html bold and italic."""
+
+    index = 0
+    is_bold = False
+    is_underline = False
+
+    # Replace all ** with <b> and </b>
+    while (index < len(line)):
+        try:
+            # Replace all ** with <b> and </b>
+            if (line[index:index + 2] == '**'):
+                line = (
+                    line[:index] +
+                    ('</b>' if (is_bold) else '<b>')
+                    + line[index + 2:]
+                )
+                is_bold = not is_bold
+                index += 2  # Increment the index by 2 to skip the next *
+                debug(f'Found bold at index {index}, content is now {line}')
+            # Replace all __ with <u> and </u>
+            if (line[index:index + 2] == '__'):
+                line = (
+                    line[:index] +
+                    ('</em>' if (is_underline) else '<em>')
+                    + line[index + 2:]
+                )
+                is_underline = not is_underline
+                index += 2  # Increment the index by 2 to skip the next _
+                debug(f'Found underline at index {index}')
+            index += 1  # Increment the index to avoid infinite loop
+        except IndexError:
+            continue
+    return line
+
+
 def get_heading_level(line: str) -> int:
     """Returns the heading level of a markdown heading."""
 
@@ -73,7 +109,7 @@ def heading(line: str) -> str:
     # level + 1 because markdown headings as space after the # symbol
     level = get_heading_level(line)
     # Strip removes leading and trailing whitespaces
-    heading_content = line[level + 1:]
+    heading_content = handle_bold_and_italic(line[level + 1:])
     debug(f'Converting \'{heading_content}\' to heading level {level}')
     return f'<h{level}>{heading_content}</h{level}>'
 
@@ -88,7 +124,7 @@ def list_item(lines: List[str], index: int,
         line = lines[i].strip()
 
         if (line.startswith(prefix)):
-            li_content = line[2:]
+            li_content = handle_bold_and_italic(line[2:])
             debug(f'Converting \'{li_content}\' to \'{list_type}\' list item')
             html.append(f'<li>{li_content}</li>')
             index += 1
@@ -108,7 +144,7 @@ def paragraph(lines: List[str], index: int) -> Tuple[
     html = []
 
     for i in range(index, len(lines)):
-        line = lines[i].strip()
+        line = handle_bold_and_italic(lines[i].strip())
 
         if (line == '' or is_markdown(line)):
             break
