@@ -7,7 +7,7 @@
 """
 
 from sys import argv, exit, stderr, stdout
-from typing import List
+from typing import List, Tuple
 from os import path
 
 
@@ -79,7 +79,7 @@ def heading(line: str) -> str:
 
 
 def list_item(lines: List[str], index: int,
-              prefix: str, list_type: str) -> tuple[int, List[str]]:
+              prefix: str, list_type: str) -> Tuple[int, List[str]]:
     """Converts markdown unordered lists to html unordered lists."""
 
     html = [f'<{list_type}>']
@@ -98,9 +98,9 @@ def list_item(lines: List[str], index: int,
     return index, html
 
 
-def paragraph(lines: List[str], index: int) -> tuple[
+def paragraph(lines: List[str], index: int) -> Tuple[
     int,
-    str | None
+    str
 ]:
     """Converts markdown paragraphs to html paragraphs."""
 
