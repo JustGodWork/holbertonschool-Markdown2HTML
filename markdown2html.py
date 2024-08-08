@@ -4,21 +4,26 @@
     Usage: markdown2html.py <inputfile.md> <outputfile.html>
 """
 
-from sys import argv, exit, stderr
+from sys import argv, exit, stderr, stdout
 from typing import List
 from os import path
+
 
 debug_state = False  # Set to True to enable debug information
 
 
 def debug(*args, **kwargs) -> None:
     """Prints debug information."""
+
     if debug_state:
+        stdout.write('\033[91mDEBUG: \033[96m')
         print(*args, **kwargs)
+        stdout.write('\033[0m')
 
 
 def open_file(filename: str) -> str:
     """Opens a file and returns the text."""
+
     if not path.isfile(filename):
         raise FileNotFoundError(f'Missing {filename}')
     with open(filename, 'r') as f:
@@ -29,6 +34,7 @@ def open_file(filename: str) -> str:
 
 def save_file(filename: str, text: str) -> None:
     """Saves the text to a file."""
+
     if (not filename.endswith('.html')):
         filename += '.html'
     with open(filename, 'w') as f:
@@ -37,6 +43,7 @@ def save_file(filename: str, text: str) -> None:
 
 def get_heading_level(line: str) -> int:
     """Returns the heading level of a markdown heading."""
+
     level = 0
     for char in line:
         if char == '#':
@@ -48,6 +55,7 @@ def get_heading_level(line: str) -> int:
 
 def heading(line: str) -> str:
     """Converts markdown headings to html headings."""
+
     # level + 1 because markdown headings as space after the # symbol
     level = get_heading_level(line)
     # Strip removes leading and trailing whitespaces
@@ -56,19 +64,23 @@ def heading(line: str) -> str:
     return f'<h{level}>{heading_content}</h{level}>'
 
 
-def unordered_list_item(lines: List[str], index: int) -> str:
+def list_item(lines: List[str], index: int,
+              prefix: str, list_type: str) -> str:
     """Converts markdown unordered lists to html unordered lists."""
-    html = ['<ul>']
+
+    html = [f'<{list_type}>']
+
     for i in range(index, len(lines)):
         line = lines[i]
-        if (line.startswith('- ')):
+
+        if (line.startswith(prefix)):
             li_content = line[2:].strip()
-            debug(f'Converting \'{li_content}\' to list item')
+            debug(f'Converting \'{li_content}\' to \'{list_type}\' list item')
             html.append(f'<li>{li_content}</li>')
             index += 1
         else:
             break
-    html.append('</ul>')
+    html.append(f'</{list_type}>')
     return index, html
 
 
@@ -89,10 +101,17 @@ def convert(lines: List[str]) -> str:
             html.append(heading(line))
             index += 1  # Go to the next line
             continue
-        if (line.startswith('- ')):
-            debug(f'{line} is an unordered list item')
+
+        is_ul_item = line.startswith('- ')
+        is_ol_item = line.startswith('* ')
+
+        if (is_ul_item or is_ol_item):
+            debug(f'{line} is a list (ul/ol) item')
             # We need to update the index with the new value
-            index, html_list = unordered_list_item(lines, index)
+            index, html_list = list_item(
+                lines, index, '- ' if (is_ul_item) else '* ',
+                'ul' if (is_ul_item) else 'ol'
+            )
             html.extend(html_list)
             continue
 
@@ -104,6 +123,7 @@ def convert(lines: List[str]) -> str:
 
 def markdown2html(inputfile: str, outputfile: str) -> None:
     """Converts markdown files to html files."""
+
     lines = open_file(inputfile)
     html_content = convert(lines)  # Convert markdown to html
     save_file(outputfile, html_content)
@@ -111,6 +131,7 @@ def markdown2html(inputfile: str, outputfile: str) -> None:
 
 def main() -> None:
     """Main function starting the program"""
+
     try:
         if (len(argv) != 3):
             raise ValueError('Usage: ./markdown2html.py README.md README.html')
