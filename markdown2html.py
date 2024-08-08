@@ -1,11 +1,13 @@
 #!/usr/bin/python3
+
+
 """
     markdown2html.py: Converts markdown files to html files.
     Usage: markdown2html.py <inputfile.md> <outputfile.html>
 """
 
 from sys import argv, exit, stderr, stdout
-from typing import List, LiteralString, Tuple
+from typing import List, Tuple
 from os import path
 
 
@@ -98,7 +100,7 @@ def list_item(lines: List[str], index: int,
 
 def paragraph(lines: List[str], index: int) -> Tuple[
     int,
-    LiteralString | None
+    str | None
 ]:
     """Converts markdown paragraphs to html paragraphs."""
 
@@ -120,8 +122,10 @@ def paragraph(lines: List[str], index: int) -> Tuple[
     html_text = f"<p>\n{html_body}\n</p>"
 
     if (index != original_index):
-        debug(f'Converted paragraph at index {original_index},\
-              incrementing index to {index}')
+        debug(
+            f'Converted paragraph at index {original_index},\
+ incrementing index to {index}'
+        )
         return index, html_text
 
     return original_index + 1, None
@@ -130,7 +134,7 @@ def paragraph(lines: List[str], index: int) -> Tuple[
 def convert(lines: List[str]) -> str:
     """Converts markdown to html."""
 
-    html: List[str | LiteralString] = []
+    html: List[str] = []
     index = 0
 
     debug(f'Converting {len(lines)} lines of markdown to html')
