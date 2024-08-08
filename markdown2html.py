@@ -11,7 +11,7 @@ from typing import List, Tuple
 from os import path
 
 
-debug_state = True  # Set to True to enable debug information
+debug_state = False  # Set to True to enable debug information
 
 
 def debug(*args, **kwargs) -> None:
@@ -86,7 +86,7 @@ def handle_bold_and_italic(line: str) -> str:
                 debug(f'Found underline at index {index}')
             index += 1  # Increment the index to avoid infinite loop
         except IndexError:
-            continue
+            break
     return line
 
 
