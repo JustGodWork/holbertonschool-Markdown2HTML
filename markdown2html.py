@@ -9,7 +9,7 @@ from typing import List, Tuple
 from os import path
 
 
-debug_state = True  # Set to True to enable debug information
+debug_state = False  # Set to True to enable debug information
 
 
 def debug(*args, **kwargs) -> None:
