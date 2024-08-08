@@ -41,6 +41,16 @@ def save_file(filename: str, text: str) -> None:
         f.write(text)
 
 
+def is_markdown(line: str) -> bool:
+    """Checks if a line is a markdown line."""
+
+    return (
+        line.startswith('#')
+        or line.startswith('- ')
+        or line.startswith('* ')
+    )
+
+
 def get_heading_level(line: str) -> int:
     """Returns the heading level of a markdown heading."""
 
@@ -96,7 +106,7 @@ def paragraph(lines: List[str], index: int) -> Tuple[
     for i in range(index, len(lines)):
         line = lines[i].strip()
 
-        if (line == ''):
+        if (line == '' or is_markdown(line)):
             break
         else:
             debug(f'Converting \'{line}\' to paragraph')
@@ -107,7 +117,7 @@ def paragraph(lines: List[str], index: int) -> Tuple[
     html_body = '\n<br/>\n'.join(html)
     html_text = f"<p>\n{html_body}\n</p>"
 
-    return index + 1, html_text if (index != original_index) else None
+    return index, html_text if (index != original_index) else None
 
 
 def convert(lines: List[str]) -> str:
